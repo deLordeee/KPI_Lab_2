@@ -1,23 +1,39 @@
-package lab2
+package main
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestPrefixToPostfix(t *testing.T) {
-	res, err := PrefixToPostfix("+ 5 * - 4 2 3")
-	if assert.Nil(t, err) {
-		assert.Equal(t, "4 2 - 3 * 5 +", res)
+func TestPrefixToInfix(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+		err      error
+	}{
+		{"+ 5 * - 4 2 ^ 3 2", "(5 + ((4 - 2) * (3 ^ 2)))", nil},
+		{"* + 1 2 3", "((1 + 2) * 3)", nil},
+		{"^ 2 3", "(2 ^ 3)", nil},
+		{"+ 1", "", errors.New("недостатньо операндів для оператора")},
+		{"1 2 +", "", errors.New("неправильний вираз")},
+		{"", "", errors.New("пустий рядок")},
+		{"+ a b", "", errors.New("недопустимий символ: a")},
+	}
+
+	for _, test := range tests {
+		result, err := PrefixToInfix(test.input)
+		if err != nil && err.Error() != test.err.Error() {
+			t.Errorf("Для виразу %s очікувалась помилка %v, але отримано %v", test.input, test.err, err)
+		}
+		if result != test.expected {
+			t.Errorf("Для виразу %s очікувалось %s, але отримано %s", test.input, test.expected, result)
+		}
 	}
 }
 
-func ExamplePrefixToPostfix() {
-	res, _ := PrefixToPostfix("+ 2 2")
-	fmt.Println(res)
-
-	// Output:
-	// 2 2 +
+func ExamplePrefixToInfix() {
+	expression := "+ 5 * - 4 2 ^ 3 2"
+	result, _ := PrefixToInfix(expression)
+	fmt.Println(result)
+	// Output: (5 + ((4 - 2) * (3 ^ 2)))
 }
